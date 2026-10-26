@@ -1,0 +1,5 @@
+sqlmodel
+pydantic
+email-validator
+alembic
+pytest
