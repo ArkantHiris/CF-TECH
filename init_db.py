@@ -12,7 +12,7 @@ def init_db() -> None:
 
     print("Création de la base de données et des tables...")
 
-    # Cette ligne lit toutes les classes ayant `table=True` et génère les CREATE TABLE
+    # Cette ligne lit toutes les classes ayant `table=True` et génère les CREATE TABLE, si elles n'existent pas
     SQLModel.metadata.create_all(engine)
 
     print("Base de données initialisée avec succès ! Le fichier cf_tech.db a été créé.")
