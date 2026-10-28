@@ -1,29 +1,20 @@
 # Importer les outils nécessaires pour valider les données
 from pydantic import BaseModel, Field
+from sqlmodel import SQLModel, Field
+from typing import Any
+from sqlalchemy import JSON
 
 
-# Définir le schéma pour créer une nouvelle salle
-class SalleCreate(BaseModel):
-
-
-    # Nom de la salle
-    nom: str = Field(min_length=1)
-
-
-    # Capacité minimale : 1 place
-    capacite: int = Field(ge=1)
-
-
-    # Localisation de la salle, limité à 50 caractères
+class SalleBase(SQLModel):
+    """
+    Champs et règles de validation d'une salle.
+    Pas de table=True : la validation Pydantic est active dès l'instanciation.
+    """
+    nom: str = Field(unique=True, index=True, min_length=1, max_length=50)
+    capacite: int = Field(gt=0)
     localisation: str = Field(min_length=1, max_length=50)
-
-
-    # Equipements disponibles, limité à 50 caractères
-    equipements: str = Field(max_length=50)
-
-
-    # Indiquer si la salle est active, inactive ou non renseignée
-    is_active: bool | None = None
+    equipements: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
+    is_active: bool = True
 
 
 # Définir le schéma pour afficher les informations d'une salle

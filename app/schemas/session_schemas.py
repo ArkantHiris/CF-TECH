@@ -1,46 +1,36 @@
 # Importer les outils nécessaires pour valider les données
 from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
-from typing import Literal
+from typing import Optional, Literal
+from pydantic import model_validator
+from sqlalchemy import JSON
+from sqlmodel import SQLModel, Field
+
+from app.enums import StatutSession
 
 
-# Définir le schéma pour créer une nouvelle session
-class SessionCreate(BaseModel):
-
-    # Titre de la session
+class SessionCoursBase(SQLModel):
+    """
+    Champs et règles de validation d'une session.
+    Pas de table=True : la validation Pydantic est active dès l'instanciation.
+    """
     titre: str = Field(min_length=1, max_length=100)
-
-    # Description facultative de la session
-    description: str | None = None
-
-    # Date et heure de début de la session
+    description: Optional[str] = Field(default=None)
     date_debut: datetime
-
-    # Date et heure de fin de la session
     date_fin: datetime
+    capacite_max: int = Field(gt=0)
+    statut: StatutSession = Field(default=StatutSession.OPEN)
+    prerequis: Optional[list[str]] = Field(default=None, sa_type=JSON)
 
-    # Nombre maximum de participants
-    capacite_max: int = Field(ge=1)
+    # Clés étrangères vers Salle et Formateur
+    salle_id: int = Field(foreign_key="salle.id", gt=0)
+    formateur_id: int = Field(foreign_key="formateur.id", gt=0)
 
-    # Statut de la session
-    statut: Literal["OPEN", "CLOSED", "ARCHIVED"]
-
-    # Prérequis facultatifs
-    prerequis: str | None = None
-
-    # Identifiant du formateur
-    id_1: int
-
-    # Identifiant de la salle
-    id_2: int
-
-    # Vérifier que la date de fin est après la date du début de la session
+    # mode="after" : l'objet existe, on peut comparer deux champs via self
     @model_validator(mode="after")
     def verifier_dates(self):
-        # comparer les deux dates
         if self.date_fin <= self.date_debut:
-            raise ValueError("Start date must be before end date ")
-        # Retourner l'objet si las dates sont valides
+            raise ValueError("date_fin doit être postérieure à date_debut")
         return self
 
 
