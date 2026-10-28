@@ -1,6 +1,7 @@
 from datetime import datetime, UTC
+from typing import Optional
+from pydantic import ConfigDict
 from sqlmodel import SQLModel, Field
-
 from app.enums import StatutInscription
 
 
@@ -17,13 +18,22 @@ class InscriptionBase(SQLModel):
     session_id: int = Field(foreign_key="session_cours.id", gt=0)
 
 
+# Début read
+
+class InscriptionRead(InscriptionBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
 
 
+# Début update
 
+class InscriptionUpdate(SQLModel):
+    """
+    Seul le statut d'une inscription peut changer (en attente -> confirmée, annulée...).
+    apprenant_id, session_id et date_inscription sont figés : pour changer d'apprenant
+    ou de session, on annule l'inscription et on en crée une nouvelle.
+    extra="forbid" refuse tout autre champ.
+    """
+    model_config = ConfigDict(extra="forbid")
 
-
-
-
-
-
-
+    statut: Optional[StatutInscription] = None
