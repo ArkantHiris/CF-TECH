@@ -1,32 +1,22 @@
-# Importer les outils pour valider les données
-from pydantic import BaseModel, Field
+from datetime import datetime, UTC
+from sqlmodel import SQLModel, Field
 
-# Importer le type pour gérer les dates et des heures
-from datetime import datetime
-
-# Importer Literal pour limiter les valeurs possibles
-from typing import Literal
-
-# Importer les statuts définis dans le modèle SQLModel
-from app.models.inscription import StatutInscription
+from app.enums import StatutInscription
 
 
-# Définir le schéma pour créer une nouvelle inscription
-class InscriptionCreate(BaseModel):
-    # Date et l'heure de l'inscription
-    date_inscription: datetime
-    # Identifiant de l'apprenant
-    apprenant_id: int
-    # Identifiant de la session
-    session_id: int
+class InscriptionBase(SQLModel):
+    """
+    Champs et règles de validation d'une inscription.
+    Pas de table=True : la validation Pydantic est active dès l'instanciation.
+    """
+    date_inscription: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    statut: StatutInscription = Field(default=StatutInscription.en_attente)
 
-    # Statut de l'inscription: utiliser les mêmes statuts que dans le modèle SQLModèle
-    statut: StatutInscription
+    # Clés étrangères pour lier l'apprenant à la session
+    apprenant_id: int = Field(foreign_key="apprenant.id", gt=0)
+    session_id: int = Field(foreign_key="session_cours.id", gt=0)
 
-# Schéma pour afficher une inscription existante
-class InscriptionRead(InscriptionCreate):
-    # Identifiant unique pour inscription
-    id: int
+
 
 
 
