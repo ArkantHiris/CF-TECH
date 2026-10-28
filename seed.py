@@ -1,8 +1,11 @@
-from sqlmodel import Session
+from sqlmodel import Session, SQLModel
 from app.database import engine
 import app.models
 from datetime import date, datetime, timezone
+from typing import Any, TypeVar
 
+# Necessaire au typage SQLModel
+T = TypeVar("T", bound=SQLModel)
 
 def valider(modele :type[T], liste_dicts : list[dict[str, Any]]) -> list[T]:
     """
