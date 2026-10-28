@@ -16,31 +16,3 @@ class SalleBase(SQLModel):
     equipements: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     is_active: bool = True
 
-
-# Définir le schéma pour afficher les informations d'une salle
-class SalleRead(BaseModel):
-
-
-    # Identifiant unique de la salle
-    id: int
-
-
-    # Nom de la salle, limité à 50 caractères
-    nom: str = Field(min_length=1, max_length=50)
-
-
-    # Capacité de la salle
-    capacite: int
-
-
-    # Localisation de la salle, limité à 50 caractères
-    localisation: str = Field(min_length=1, max_length=50)
-
-
-    # Equipements disponibles, limité à 50 caractères
-    equipements: str = Field(max_length=50)
-
-    # Indiquer si la salle est active, inactive ou non renseignée
-    is_active: bool | None
-    
-    

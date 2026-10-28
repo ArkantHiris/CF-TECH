@@ -33,36 +33,3 @@ class SessionCoursBase(SQLModel):
             raise ValueError("date_fin doit être postérieure à date_debut")
         return self
 
-
-# Définir le schéma pour afficher une session
-class SessionRead(BaseModel):
-
-    # Identifiant unique de la session
-    id: int
-
-    # Titre de la session
-    titre: str
-
-    # Description facultative
-    description: str | None
-
-    # Date et heure de début
-    date_debut: datetime
-
-    # Date et heure de fin
-    date_fin: datetime
-
-    # Nombre maximum de participants
-    capacite_max: int
-
-    # Statut de la session
-    statut: Literal["OPEN", "CLOSED", "ARCHIVED"]
-
-    # Prérequis facultatifs
-    prerequis: str | None
-
-    # Identifiant du formateur
-    id_1: int
-
-    # Identifiant de la salle
-    id_2: int
