@@ -5,7 +5,10 @@ from app.schemas.salle_schemas import SalleBase
 
 
 class Salle(SalleBase, table=True):
-    """Table créée physiquement"""
+    """
+    Class permettant la création physique de la table salle, table = true
+    """
+    
     __tablename__ = "salle"
 
     id: Optional[int] = Field(default=None, primary_key=True)

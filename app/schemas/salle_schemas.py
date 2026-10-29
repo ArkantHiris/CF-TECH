@@ -8,7 +8,7 @@ from sqlmodel import SQLModel, Field
 class SalleBase(SQLModel):
     """
     Champs et règles de validation d'une salle.
-    Pas de table=True : la validation Pydantic est active dès l'instanciation.
+    Pas de table = True pour permette à Pydantic la validation dès l'instanciation
     """
     nom: str = Field(unique=True, index=True, min_length=1, max_length=50)
     capacite: int = Field(gt=0)
@@ -20,6 +20,11 @@ class SalleBase(SQLModel):
 # Début read
 
 class SalleRead(SalleBase):
+    """
+    Permet la lecture de la table salle, pour une potentielle API
+    """
+
+    # configdict permet à Pydantic d'accepter autre chose qu'un dict
     model_config = ConfigDict(from_attributes=True)
     id: int
 
@@ -28,9 +33,11 @@ class SalleRead(SalleBase):
 
 class SalleUpdate(SQLModel):
     """
-    Champs modifiables d'une salle. Tous sont facultatifs ;
-    extra="forbid" refuse les champs inconnus (dont "id").
+    Champs modifiables d'une salle. 
+    Tous sont facultatifs 
     """
+
+    # extra_forbid refuse tout autre champs que ceux autorisés (donc id)
     model_config = ConfigDict(extra="forbid")
 
     nom: Optional[str] = Field(default=None, min_length=1, max_length=50)

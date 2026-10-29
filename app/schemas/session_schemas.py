@@ -8,8 +8,8 @@ from app.enums import StatutSession
 
 class SessionCoursBase(SQLModel):
     """
-    Champs et règles de validation d'une session.
-    Pas de table=True : la validation Pydantic est active dès l'instanciation.
+    Champs et règles de validation d'une session
+    Pas de table = True pour permette à Pydantic la validation dès l'instanciation
     """
     titre: str = Field(min_length=1, max_length=100)
     description: Optional[str] = Field(default=None)
@@ -34,6 +34,10 @@ class SessionCoursBase(SQLModel):
 # Début read
 
 class SessionCoursRead(SessionCoursBase):
+    """
+    Permet la lecture de la table session cours, pour une potentielle API
+    """
+
     model_config = ConfigDict(from_attributes=True)
     id: int
 
@@ -42,9 +46,11 @@ class SessionCoursRead(SessionCoursBase):
 
 class SessionCoursUpdate(SQLModel):
     """
-    Champs modifiables d'une session. Tous sont facultatifs ;
-    extra="forbid" refuse les champs inconnus (dont "id").
+    Champs modifiables d'une session
+    Tous sont facultatifs 
     """
+
+    # extra="forbid" refuse les champs inconnus (dont "id")
     model_config = ConfigDict(extra="forbid")
 
     titre: Optional[str] = Field(default=None, min_length=1, max_length=100)
