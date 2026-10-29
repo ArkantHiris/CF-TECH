@@ -1,8 +1,8 @@
-# Importer les outils nécessaires pour valider les données
-from pydantic import BaseModel, Field
-from sqlmodel import SQLModel, Field
-from typing import Any
+from typing import Any, Optional
+
+from pydantic import ConfigDict
 from sqlalchemy import JSON
+from sqlmodel import SQLModel, Field
 
 
 class SalleBase(SQLModel):
@@ -16,3 +16,25 @@ class SalleBase(SQLModel):
     equipements: dict[str, Any] = Field(default_factory=dict, sa_type=JSON)
     is_active: bool = True
 
+
+# Début read
+
+class SalleRead(SalleBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
+# Début update
+
+class SalleUpdate(SQLModel):
+    """
+    Champs modifiables d'une salle. Tous sont facultatifs ;
+    extra="forbid" refuse les champs inconnus (dont "id").
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    nom: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    capacite: Optional[int] = Field(default=None, gt=0)
+    localisation: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    equipements: Optional[dict[str, Any]] = None
+    is_active: Optional[bool] = None

@@ -1,11 +1,8 @@
-# Importer les outils nécessaires pour valider les données
-from pydantic import BaseModel, Field, model_validator
 from datetime import datetime
-from typing import Optional, Literal
-from pydantic import model_validator
+from typing import Optional
+from pydantic import ConfigDict, model_validator
 from sqlalchemy import JSON
 from sqlmodel import SQLModel, Field
-
 from app.enums import StatutSession
 
 
@@ -33,3 +30,29 @@ class SessionCoursBase(SQLModel):
             raise ValueError("date_fin doit être postérieure à date_debut")
         return self
 
+
+# Début read
+
+class SessionCoursRead(SessionCoursBase):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+
+
+# Début update
+
+class SessionCoursUpdate(SQLModel):
+    """
+    Champs modifiables d'une session. Tous sont facultatifs ;
+    extra="forbid" refuse les champs inconnus (dont "id").
+    """
+    model_config = ConfigDict(extra="forbid")
+
+    titre: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    description: Optional[str] = None
+    date_debut: Optional[datetime] = None
+    date_fin: Optional[datetime] = None
+    capacite_max: Optional[int] = Field(default=None, gt=0)
+    statut: Optional[StatutSession] = None
+    prerequis: Optional[list[str]] = None
+    salle_id: Optional[int] = Field(default=None, gt=0)
+    formateur_id: Optional[int] = Field(default=None, gt=0)
