@@ -1,8 +1,8 @@
-"""migration v3
+"""Version 3: ajout de la colonne equipements à salle
 
-Revision ID: 9157daba8078
-Revises: c1b0adae884c
-Create Date: 2026-10-28 15:57:07.158547
+Revision ID: e6b1b0779aa2
+Revises: 9b888bb5f12f
+Create Date: 2026-10-29 23:43:52.989695
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '9157daba8078'
-down_revision: Union[str, Sequence[str], None] = 'c1b0adae884c'
+revision: str = 'e6b1b0779aa2'
+down_revision: Union[str, Sequence[str], None] = '9b888bb5f12f'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
