@@ -1,8 +1,8 @@
-"""Version 4: ajout de la variable superadmin aux niveaux d'acces d'admin
+"""Migration v1 Tables initiales
 
-Revision ID: 858b56ba93b0
-Revises: e6b1b0779aa2
-Create Date: 2026-10-29 23:46:15.923639
+Revision ID: 72c88ff725d5
+Revises: 
+Create Date: 2026-10-30 08:51:14.117973
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '858b56ba93b0'
-down_revision: Union[str, Sequence[str], None] = 'e6b1b0779aa2'
+revision: str = '72c88ff725d5'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
