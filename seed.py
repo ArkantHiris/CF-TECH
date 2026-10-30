@@ -5,7 +5,6 @@ from sqlmodel import Session
 from app.database import engine
 from app.enums import Role, NiveauEtude, Postes, NiveauAcces
 
-# Adaptez les noms de modules à votre dossier (vous utilisez "controler" pour les deux premiers)
 from app.services.salle_service import creer_salle
 from app.services.user_service import (
     creer_formateur,
@@ -72,8 +71,6 @@ def seed_database() -> None:
             ]]
 
             # 5. Admins
-            # L'email de Thomas Moreau (admin) est différent de celui du staff :
-            # l'unicité est vérifiée sur les 4 tables d'utilisateurs.
             admins = [creer_admin(session, d) for d in [
                 {"nom": "Bernard", "prenom": "Claire", "email": "claire.bernard@cf-tech.fr",
                  "role": Role.admin, "niveau_acces": NiveauAcces.superadmin,
@@ -84,8 +81,6 @@ def seed_database() -> None:
             ]]
 
             # 6. Sessions
-            # creer_session_cours valide et vérifie les règles mais n'ajoute pas l'objet :
-            # add + flush après chaque session pour que la suivante la voie.
             donnees_sessions = [
                 {"titre": "Initiation Python", "capacite_max": 30,
                  "description": "Bases du langage Python",
@@ -117,7 +112,6 @@ def seed_database() -> None:
                 sessions_formation.append(s)
 
             # 7. Inscriptions
-            # creer_inscription fait déjà add + flush : pas besoin de les refaire.
             donnees_inscriptions = [
                 {"apprenant_id": apprenants[0].id, "session_id": sessions_formation[0].id},
                 {"apprenant_id": apprenants[0].id, "session_id": sessions_formation[1].id},

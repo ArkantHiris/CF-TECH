@@ -8,7 +8,7 @@ from app.enums import StatutInscription
 class InscriptionBase(SQLModel):
     """
     Champs et règles de validation d'une inscription.
-    Pas de table=True : la validation Pydantic est active dès l'instanciation.
+    Pas de table = True pour permette à Pydantic la validation dès l'instanciation
     """
     date_inscription: datetime = Field(default_factory=lambda: datetime.now(UTC))
     statut: StatutInscription = Field(default=StatutInscription.en_attente)
@@ -21,6 +21,11 @@ class InscriptionBase(SQLModel):
 # Début read
 
 class InscriptionRead(InscriptionBase):
+    """
+    Permet la lecture de la table inscription, pour une potentielle API
+    """
+
+    # Configdict permet à Pydantic d'accepter autre chose qu'un dict
     model_config = ConfigDict(from_attributes=True)
     id: int
 
@@ -29,11 +34,12 @@ class InscriptionRead(InscriptionBase):
 
 class InscriptionUpdate(SQLModel):
     """
-    Seul le statut d'une inscription peut changer (en attente -> confirmée, annulée...).
-    apprenant_id, session_id et date_inscription sont figés : pour changer d'apprenant
-    ou de session, on annule l'inscription et on en crée une nouvelle.
-    extra="forbid" refuse tout autre champ.
+    Seul le statut d'une inscription peut changer (en attente -> confirmée, annulée...)
+    apprenant_id, session_id et date_inscription sont inchangeables 
+    Pour changer d'apprenant ou de session, on annule l'inscription et on en crée une nouvelle
     """
+
+    # extra="forbid" refuse tout autre champ.
     model_config = ConfigDict(extra="forbid")
 
     statut: Optional[StatutInscription] = None

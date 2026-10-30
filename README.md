@@ -68,10 +68,33 @@ These rules describe the intended scope and should be verified against the curre
 
 ```text
 CF-TECH/
-├── docs/              # Project documentation
-├── app.py             # Application entry point
-├── requirements.txt   # Python dependencies
-└── README.md          # Project documentation
+├── alembic/                                 # db versioning
+├── app/
+|     ├──models/                             # models for the different tables
+|     |     ├──__init__.py
+|     |     ├──inscription.py
+|     |     ├──salle.py
+|     |     ├──session.py
+|     |     └──user.py
+|     ├──schemas/                            # schemas for the different tables
+|     |     ├──__init__.py
+|     |     ├──inscription_schemas.py
+|     |     ├──salle_schemas.py
+|     |     ├──session_schemas.py
+|     |     └──user_schemas.py               
+|     ├──service/                            # services for the different tables
+|     |     ├──inscription_service.py        
+|     |     ├──salle_service.py              
+|     |     ├──session_service.py            
+|     |     └──user_service.py               
+|     ├──database.py                         # config sqlmodel
+|     ├──enums.py                            # list of enums of the project
+├── app_test.py                              # Application entry point
+├── init_db.py                               # script create db
+├── interface.py                             # interface config
+├── seed.py                                  # script seed db
+├── requirements.txt                         # Python dependencies
+└── README.md                                # Project documentation
 ```
 
 The structure may evolve as models, database configuration, business logic, migrations, and tests are added.
@@ -108,6 +131,18 @@ The structure may evolve as models, database configuration, business logic, migr
    ```bash
    python -m pip install --upgrade pip
    pip install -r requirements.txt
+   ```
+
+5. Create database v4 :
+
+   ```bash
+   python init_db.py
+   ```
+
+6. Seed the database (only v4) :
+
+      ```bash
+   python seed.py
    ```
 
 ### Usage
@@ -220,10 +255,33 @@ Ces règles décrivent le périmètre attendu et doivent être vérifiées par r
 
 ```text
 CF-TECH/
-├── docs/              # Documentation du projet
-├── app.py             # Point d’entrée de l’application
-├── requirements.txt   # Dépendances Python
-└── README.md          # Documentation du projet
+├── alembic/                                 # db versioning
+├── app/
+|     ├──models/                             # models for the different tables
+|     |     ├──__init__.py
+|     |     ├──inscription.py
+|     |     ├──salle.py
+|     |     ├──session.py
+|     |     └──user.py
+|     ├──schemas/                            # schemas for the different tables
+|     |     ├──__init__.py
+|     |     ├──inscription_schemas.py
+|     |     ├──salle_schemas.py
+|     |     ├──session_schemas.py
+|     |     └──user_schemas.py               
+|     ├──service/                            # services for the different tables
+|     |     ├──inscription_service.py        
+|     |     ├──salle_service.py              
+|     |     ├──session_service.py            
+|     |     └──user_service.py               
+|     ├──database.py                         # config sqlmodel
+|     ├──enums.py                            # list of enums of the project
+├── app_test.py                              # Application entry point
+├── init_db.py                               # script create db
+├── interface.py                             # interface config
+├── seed.py                                  # script seed db
+├── requirements.txt                         # Python dependencies
+└── README.md                                # Project documentation
 ```
 
 Cette structure pourra évoluer avec l’ajout des modèles, de la configuration de la base de données, de la logique métier, des migrations et des tests.
@@ -260,6 +318,18 @@ Cette structure pourra évoluer avec l’ajout des modèles, de la configuration
    ```bash
    python -m pip install --upgrade pip
    pip install -r requirements.txt
+   ```
+
+5. Créer la base de données v4 :
+
+   ```bash
+   python init_db.py
+   ```
+
+6. Remplis la base de données (seulement v4) :
+
+      ```bash
+   python seed.py
    ```
 
 ### Utilisation

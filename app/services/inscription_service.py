@@ -6,46 +6,65 @@ from app.enums import StatutInscription, StatutSession
 from app.models import Apprenant, SessionCours, Inscription
 
 
-# =====================================================================
-# Règles réutilisables (création ET réactivation d'une inscription)
-# =====================================================================
+# Methodes réutilisables dans plusieurs fonctions
 
 def verifier_inscription_existante(db: Session, apprenant_id: int, session_id: int) -> bool:
-    """True si l'apprenant a déjà une inscription (même annulée) à cette session."""
+    """
+    True si l'apprenant a déjà une inscription (même annulée) à cette session
+    """
+
     requete = select(Inscription).where(
+
         Inscription.apprenant_id == apprenant_id,
         Inscription.session_id == session_id,
+
     )
+
     return db.exec(requete).first() is not None
 
 
-def _verifier_session_ouverte(session_cours: SessionCours) -> None:
+def verifier_session_ouverte(session_cours: SessionCours) -> None:
+    """
+    True si la session est bien ouverte 
+    """
+
     if session_cours.statut != StatutSession.OPEN:
+
         raise ValueError(
+
             f"La session « {session_cours.titre} » n'est pas ouverte "
             f"(statut : {session_cours.statut.value})"
         )
 
 
-def _verifier_places(db: Session, session_cours: SessionCours) -> None:
-    """Nombre d'inscrits (hors annulées) strictement inférieur à capacite_max."""
+def verifier_places(db: Session, session_cours: SessionCours) -> None:
+    """
+    True si le nombre d'inscrits (hors annulés) strictement inférieur à capacite_max
+    """
+
     nb_inscrits = db.exec(
+
         select(func.count()).select_from(Inscription).where(
+
             Inscription.session_id == session_cours.id,
             Inscription.statut != StatutInscription.annulee,
         )
     ).one()
+
     if nb_inscrits >= session_cours.capacite_max:
+
         raise ValueError(
-            f"La session « {session_cours.titre} » est complète "
+
+            f"La session « {session_cours.titre} » est complète"
             f"({session_cours.capacite_max} places)"
         )
 
 
-def _verifier_pas_de_chevauchement(
-    db: Session, apprenant_id: int, session_cours: SessionCours
-) -> None:
-    """Aucune autre session (inscription non annulée) de l'apprenant ne chevauche celle-ci."""
+def verifier_pas_de_chevauchement(db: Session, apprenant_id: int, session_cours: SessionCours) -> None:
+    """
+    Provoque une erreur si il y a chevauchement de sessiosn
+    """
+
     conflit = db.exec(
         select(SessionCours)
         .join(Inscription, Inscription.session_id == SessionCours.id)
@@ -58,104 +77,134 @@ def _verifier_pas_de_chevauchement(
         )
     ).first()
     if conflit:
+        # Interrompt si une erreur est trouvée
         raise ValueError(
             f"L'apprenant {apprenant_id} est déjà inscrit à « {conflit.titre} » "
             f"({conflit.date_debut} → {conflit.date_fin}), qui chevauche cette session"
         )
 
 
-# =====================================================================
-# Création
-# =====================================================================
+# Méthodes de création 
 
 def creer_inscription(db: Session, donnees: dict[str, Any]) -> Inscription:
     """
-    1. Validation Pydantic (champs, ids positifs)
-    2. L'apprenant et la session existent
-    3. Pas de doublon (apprenant, session)
-    4. La session est OPEN
-    5. Il reste de la place
-    6. Pas de chevauchement avec une autre session de l'apprenant
+    Crée l'inscription d'un apprenant à une session si il passe toutes les vérifs
     """
+
     # 1. Validation Pydantic
     inscription = Inscription.model_validate(donnees)
 
-    # 2. Existence
+    # 2. Existence de l'apprenant ou la session de cours
     if db.get(Apprenant, inscription.apprenant_id) is None:
+
         raise ValueError(f"L'apprenant {inscription.apprenant_id} n'existe pas")
+    
     session_cours = db.get(SessionCours, inscription.session_id)
+
     if session_cours is None:
+
         raise ValueError(f"La session {inscription.session_id} n'existe pas")
 
-    # 3. Doublon
+    # 3. Doublon d'inscription de l'apprenant sur ce cours
     if verifier_inscription_existante(db, inscription.apprenant_id, inscription.session_id):
+
         raise ValueError(
-            f"L'apprenant {inscription.apprenant_id} est déjà inscrit à "
-            f"« {session_cours.titre} » (réactivez l'inscription existante si elle est annulée)"
+
+            f"L'apprenant {inscription.apprenant_id} est déjà inscrit à « {session_cours.titre} »"
+
         )
 
-    # 4 à 6. Règles de la session
-    _verifier_session_ouverte(session_cours)
-    _verifier_places(db, session_cours)
-    _verifier_pas_de_chevauchement(db, inscription.apprenant_id, session_cours)
+    # 4. Session ouverte
+    verifier_session_ouverte(session_cours)
+
+    # 5. Places encore disponibles
+    verifier_places(db, session_cours)
+
+    # 6. Cours en simultanés
+    verifier_pas_de_chevauchement(db, inscription.apprenant_id, session_cours)
 
     db.add(inscription)
-    db.flush()                      # id disponible, pas de commit
+
+    # id disponible, pas de commit
+    db.flush()        
+
     return inscription
 
 
-# =====================================================================
-# Lecture
-# =====================================================================
+# Méthode de lecture
 
 def lire_inscription(db: Session, inscription_id: int) -> Inscription | None:
+    """
+    Lecture des data d'une inscription par rapport à son id
+    """
+
     return db.get(Inscription, inscription_id)
 
 
-def lister_inscriptions(
-    db: Session,
-    apprenant_id: int | None = None,
-    session_id: int | None = None,
-) -> list[Inscription]:
-    """Toutes les inscriptions, filtrables par apprenant et/ou par session."""
+def lister_inscriptions(db: Session, apprenant_id: int | None = None, session_id: int | None = None,) -> list[Inscription]:
+    """
+    Toutes les inscriptions, filtrables par apprenant et/ou par session
+    """
+
     requete = select(Inscription)
+
     if apprenant_id is not None:
+
         requete = requete.where(Inscription.apprenant_id == apprenant_id)
+
     if session_id is not None:
+
         requete = requete.where(Inscription.session_id == session_id)
+
     return list(db.exec(requete).all())
 
 
-# =====================================================================
-# Modification du statut
-# =====================================================================
 
-def modifier_statut_inscription(
-    db: Session, inscription_id: int, nouveau_statut: StatutInscription
-) -> Inscription:
+# Methodes update
+
+def modifier_statut_inscription(db: Session, inscription_id: int, nouveau_statut: StatutInscription) -> Inscription:
+    """
+    Permet de modifier le statut d'une inscription
+    """
+
+    # vérifie l'existence de l'inscription
     inscription = lire_inscription(db, inscription_id)
+
     if inscription is None:
+
         raise ValueError(f"L'inscription {inscription_id} est introuvable")
 
     ancien = inscription.statut
 
-    # Une inscription terminée est définitive
+    # vérifie si l'inscription est finie
     if ancien == StatutInscription.terminee and nouveau_statut != ancien:
+
         raise ValueError("Une inscription terminée ne peut plus changer de statut")
 
-    # Réactiver une inscription annulée = reprendre une place : on rejoue les règles
+    # Réactiver une inscription annulée 
     if ancien == StatutInscription.annulee and nouveau_statut != StatutInscription.annulee:
+
         session_cours = db.get(SessionCours, inscription.session_id)
-        _verifier_session_ouverte(session_cours)
-        _verifier_places(db, session_cours)
-        _verifier_pas_de_chevauchement(db, inscription.apprenant_id, session_cours)
+
+        # on révérifie les règles d'inscription
+        verifier_session_ouverte(session_cours)
+        verifier_places(db, session_cours)
+        verifier_pas_de_chevauchement(db, inscription.apprenant_id, session_cours)
+
 
     inscription.statut = nouveau_statut
+
     db.add(inscription)
+    # car on connait l'id
     db.flush()
+
     return inscription
 
 
 def annuler_inscription(db: Session, inscription_id: int) -> Inscription:
-    """Annule sans supprimer : l'historique est conservé et la place est libérée."""
+    """
+    Annule sans supprimer : l'historique est conservé et la place est libérée
+    Utile si on se réinscrit
+    """
+
     return modifier_statut_inscription(db, inscription_id, StatutInscription.annulee)
